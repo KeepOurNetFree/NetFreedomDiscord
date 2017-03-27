@@ -1,2 +1,2 @@
 # NetFreedomDiscord
-The discord bot for http://keepournetfree.org, runs using NodeJS and Discord.JS.
+The discord bot for http://www.keepournetfree.org, runs using NodeJS and Discord.JS.
