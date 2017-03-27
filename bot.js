@@ -58,4 +58,4 @@ var interval = minutes * 60 * 1000;
 
 setInterval(checkForNewPost, interval);
 
-client.login('Mjk1OTQzNjcxMjk0MDY2Njk5.C7rDCA.M3HrWkkL9MnJ2DuqFGJC1Zy-46E');
+client.login('');
