@@ -13,7 +13,7 @@ client.on('message', msg => {
 
 client.on('guildMemberAdd', member => {
    member.guild.channels.forEach(function(channel){
-       if(channel.id == 270601378341191681){
+       if(channel.id == 295745377083326464){
            channel.sendMessage("Welcome @" + member.user + " to Keep Our Net Free!");
            console.log("Member " + member.user.username + " joined");
        }
