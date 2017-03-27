@@ -1,0 +1,22 @@
+{
+  "name": "konfdiscordbot",
+  "version": "1.0.0",
+  "description": "The discord bot for keepournetfree.org, runs using NodeJS and Discord.JS",
+  "main": "bot.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/KeepOurNetFree/NetFreedomDiscord.git"
+  },
+  "author": "Joseph Dempsey",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/KeepOurNetFree/NetFreedomDiscord/issues"
+  },
+  "homepage": "https://github.com/KeepOurNetFree/NetFreedomDiscord#readme",
+  "dependencies": {
+    "discord.js": "^11.0.0"
+  }
+}
