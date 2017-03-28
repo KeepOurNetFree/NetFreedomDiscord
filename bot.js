@@ -38,7 +38,7 @@ function checkForNewPost () {
             if(newestPostTitle != checkPost){
                 newestPostTitle = checkPost;
                 sendMessage("New KONF reddit post! \"" + newestPostTitle + "\" " + checkPostURL, newRedditPostChannel);
-                console.log("New reddit post! " checkPostURL);
+                console.log("New reddit post! " + checkPostURL);
             }
         }
     });
