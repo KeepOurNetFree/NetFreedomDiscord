@@ -5,7 +5,7 @@ const client = new Discord.Client();
 var newMemberChannel = 295745377083326464;
 var newRedditPostChannel = 295748944347004948;
 
-var devChannelID = 270601378341191681;
+//var devChannelID = 270601378341191681;
 
 client.on('ready', () => {
   console.log("Connected!");
@@ -21,7 +21,7 @@ client.on('message', msg => {
 });
 
 client.on('guildMemberAdd', member => {
-    sendMessage("Welcome " + member.user + " to Keep Our Net Free!", devChannelID);
+    sendMessage("Welcome " + member.user + " to Keep Our Net Free!", newMemberChannel);
 });
 
 var newestPostTitle = "";
@@ -37,7 +37,7 @@ function checkForNewPost () {
             
             if(newestPostTitle != checkPost){
                 newestPostTitle = checkPost;
-                sendMessage("New KONF reddit post! \"" + newestPostTitle + "\" " + checkPostURL, devChannelID);
+                sendMessage("New KONF reddit post! \"" + newestPostTitle + "\" " + checkPostURL, newRedditPostChannel);
             } else {
                 console.log("No new posts D:");
             }
@@ -62,7 +62,7 @@ function checkSubCount () {
             var subscriberCount = subData["data"].subscribers;
             
             if(subscriberCount - currentSubCount >= 1000){
-                sendMessage("Current subscriber count: " + subscriberCount, devChannelID);
+                sendMessage("Current subscriber count: " + subscriberCount, newRedditPostChannel);
             } else {
                 console.log("Sub change over past 30 minutes: " + subscriberCount - currentSubCount);
             }
@@ -70,7 +70,7 @@ function checkSubCount () {
     });
 }
 
-setInterval(checkForNewPost, subCountInterval);
+setInterval(checkSubCount, subCountInterval);
 
 function sendMessage (msg, channelID) {
     client.guilds.forEach(function(guild){
