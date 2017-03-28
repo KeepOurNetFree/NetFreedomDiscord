@@ -30,7 +30,7 @@ function checkForNewPost () {
         } else {
             var postData = JSON.parse(body);
             var checkPost = postData["data"]["children"][0]["data"].title;
-            var checkPostURL = postData["data"]["children"][0]["data"].url;
+            var checkPostURL = "https://www.reddit.com" + postData["data"]["children"][0]["data"].permalink;
             
             if(newestPostTitle != checkPost){
                 newestPostTitle = checkPost;
