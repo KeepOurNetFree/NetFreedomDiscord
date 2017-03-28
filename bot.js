@@ -38,8 +38,7 @@ function checkForNewPost () {
             if(newestPostTitle != checkPost){
                 newestPostTitle = checkPost;
                 sendMessage("New KONF reddit post! \"" + newestPostTitle + "\" " + checkPostURL, newRedditPostChannel);
-            } else {
-                console.log("No new posts D:");
+                console.log("New reddit post! " checkPostURL);
             }
         }
     });
@@ -61,6 +60,7 @@ function checkSubCount () {
             var subscriberCount = subData["data"].subscribers;
 
             sendMessage("Current subscriber count: " + subscriberCount, newRedditPostChannel);
+            console.log("Current subscriber count: " + subscriberCount);
         } 
     });
 }
