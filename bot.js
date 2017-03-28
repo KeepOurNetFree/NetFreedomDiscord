@@ -12,8 +12,8 @@ client.on('ready', () => {
 });
 
 client.on('message', msg => {
-    if (msg.content === 'KONF test') {
-        msg.reply('Up and running! ;D');
+    if (msg.content === 'KONF help') {
+        msg.reply('New members are welcomed automatically. Run "KONF subscribers" to see the current sub count.');
     }
     if (msg.content === 'KONF subscribers') {
         checkSubCount();
@@ -47,7 +47,6 @@ function checkForNewPost () {
 
 var minutes = 1;
 var interval = minutes * 60 * 1000;
-var subCountInterval = (minutes * 30) * 60 * 1000;
 
 setInterval(checkForNewPost, interval);
 
@@ -60,17 +59,11 @@ function checkSubCount () {
         } else {
             var subData = JSON.parse(body);
             var subscriberCount = subData["data"].subscribers;
-            
-            if(subscriberCount - currentSubCount >= 1000){
-                sendMessage("Current subscriber count: " + subscriberCount, newRedditPostChannel);
-            } else {
-                console.log("Sub change over past 30 minutes: " + subscriberCount - currentSubCount);
-            }
+
+            sendMessage("Current subscriber count: " + subscriberCount, newRedditPostChannel);
         } 
     });
 }
-
-setInterval(checkSubCount, subCountInterval);
 
 function sendMessage (msg, channelID) {
     client.guilds.forEach(function(guild){
