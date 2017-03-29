@@ -33,7 +33,7 @@ client.on('message', msg => {
 //when someone joins this event is called, the variable member is of type GuildMember in Discord.JS
 client.on('guildMemberAdd', member => {
     //welcome the new user
-    sendMessage("Welcome " + member.user + "! Thanks for helping to Keep Our Net Free! Be sure to checkout #info!", newMemberChannel);
+    sendMessage("Welcome " + member.user + "! Thanks for helping to Keep Our Net Free! Be sure to give #info a read!", newMemberChannel);
     sendMessage("User " + member.user " has joined.", botLoggingChannel);
 });
 
