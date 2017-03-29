@@ -13,7 +13,7 @@ client.on('ready', () => {
 
 client.on('message', msg => {
     if (msg.content === 'KONF help') {
-        msg.reply('New members are welcomed automatically. Run 'KONF subscribers' to see the current sub count.');
+        msg.reply('New members are welcomed automatically. Run "KONF subscribers" to see the current sub count.');
     }
     if (msg.content === 'KONF subscribers') {
         checkSubCount();
