@@ -39,7 +39,7 @@ client.on('guildMemberAdd', member => {
 
 //event for people leaving or being kicked, sent to the log only
 client.on('guildMemberRemove', member => {
-    sendMessage("User " + member.user " has left.", botLoggingChannel);
+    sendMessage("User " + member.user + " has left.", botLoggingChannel);
 });
 
 //Current UTC time. Reddit uses seconds, not milliseconds like JS
