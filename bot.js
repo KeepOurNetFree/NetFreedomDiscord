@@ -17,6 +17,7 @@ var botLoggingChannel = 296674818026373123;
 //pretty self-explanatory, when the bot's connected properly, log it, for some reason this happens a couple times when the bot first starts
 client.on('ready', () => {
     console.log('Connected!');
+    findInfoChannel();
 });
 
 //message recieved event
@@ -30,10 +31,26 @@ client.on('message', msg => {
     }
 });
 
+//the ID for channel #info
+var infoChannelID = 296678122135355393;
+//undefined varible which will become a GuildChannel object once the next loop runs at startup
+var infoChannel;
+
+function findInfoChannel() {
+    client.guilds.forEach(function (guild) {
+        guild.channels.forEach(function (channel) {
+            if (channel.id == infoChannelID) {
+                //sets the info channel so we can use it in the mentions later
+                infoChannel = channel;
+            }
+        });
+    });
+}
+
 //when someone joins this event is called, the variable member is of type GuildMember in Discord.JS
 client.on('guildMemberAdd', member => {
     //welcome the new user
-    sendMessage("Welcome " + member.user + "! Thanks for helping to Keep Our Net Free! Be sure to give #info a read!", newMemberChannel);
+    sendMessage("Welcome " + member.user + "! Thanks for helping to Keep Our Net Free! Be sure to give " + infoChannel + " a read!", newMemberChannel);
     sendMessage("User " + member.user + " has joined.", botLoggingChannel);
 });
 
