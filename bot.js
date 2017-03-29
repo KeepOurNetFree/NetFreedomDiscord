@@ -95,7 +95,7 @@ function checkForNewPost() {
 }
 
 //minutes between checking for a new reddit post
-var minutes = 1;
+var minutes = 0.5;
 var interval = minutes * 60 * 1000;
 
 setInterval(checkForNewPost, interval);
