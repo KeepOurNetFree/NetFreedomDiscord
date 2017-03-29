@@ -1,5 +1,5 @@
 var request = require('request');
-const Discord = require("discord.js");
+const Discord = require('discord.js');
 const client = new Discord.Client();
 
 var newMemberChannel = 295745377083326464;
@@ -8,7 +8,7 @@ var newRedditPostChannel = 295748944347004948;
 //var devChannelID = 270601378341191681;
 
 client.on('ready', () => {
-  console.log("Connected!");
+    console.log('Connected!');
 });
 
 client.on('message', msg => {
@@ -21,24 +21,33 @@ client.on('message', msg => {
 });
 
 client.on('guildMemberAdd', member => {
-    sendMessage("Welcome " + member.user + " to Keep Our Net Free!", newMemberChannel);
+    sendMessage('Welcome ' + member.user + ' to Keep Our Net Free!', newMemberChannel);
 });
 
-var newestPostTitle = "";
+//Current UTC time. Reddit uses seconds, not milliseconds like JS
+var newestPostTimeUTC = Math.floor(new Date().getTime() / 1000);
 
-function checkForNewPost () {
-    request("https://www.reddit.com/r/KeepOurNetFree/new/.json", function (error, response, body) {
-        if(error){
-           console.log(error);
-        } else {
-            var postData = JSON.parse(body);
-            var checkPost = postData["data"]["children"][0]["data"].title;
-            var checkPostURL = "https://www.reddit.com" + postData["data"]["children"][0]["data"].permalink;
-            
-            if(newestPostTitle != checkPost){
-                newestPostTitle = checkPost;
-                sendMessage("New KONF reddit post! \"" + newestPostTitle + "\" " + checkPostURL, newRedditPostChannel);
-                console.log("New reddit post! " + checkPostURL);
+function checkForNewPost() {
+    request('https://www.reddit.com/r/KeepOurNetFree/new/.json', function (error, response, body) {
+        if (error) {
+            console.log(error);
+        }
+        else {
+            //A try/catch for if the postdata is invalid JSON, if there's no first child, no permalink, etc.
+            try {
+                var postData = JSON.parse(body);
+                var checkPostTimeUTC = postData['data']['children'][0]['data'].created_utc;
+                var checkPostTitle = postData['data']['children'][0]['data'].title;
+                var checkPostURL = 'https://www.reddit.com' + postData['data']['children'][0]['data'].permalink;
+
+                if (newestPostTimeUTC < checkPostTimeUTC) {
+                    newestPostTimeUTC = checkPostTimeUTC;
+                    sendMessage('New KONF reddit post! "' + checkPostTitle + '" ' + checkPostURL, newRedditPostChannel);
+                    console.log('New reddit post! ' + checkPostURL);
+                }
+            }
+            catch (err) {
+                console.log('Error while getting latest Reddit post: ' + err.message)
             }
         }
     });
@@ -51,27 +60,28 @@ setInterval(checkForNewPost, interval);
 
 var currentSubCount = 0;
 
-function checkSubCount () {
-    request("https://www.reddit.com/r/KeepOurNetFree/about.json", function(error, response, body) {
-        if(error){
+function checkSubCount() {
+    request('https://www.reddit.com/r/KeepOurNetFree/about.json', function (error, response, body) {
+        if (error) {
             console.log(error);
-        } else {
+        }
+        else {
             var subData = JSON.parse(body);
-            var subscriberCount = subData["data"].subscribers;
+            var subscriberCount = subData['data'].subscribers;
 
-            sendMessage("Current subscriber count: " + subscriberCount, newRedditPostChannel);
-            console.log("Current subscriber count: " + subscriberCount);
-        } 
+            sendMessage('Current subscriber count: ' + subscriberCount, newRedditPostChannel);
+            console.log('Current subscriber count: ' + subscriberCount);
+        }
     });
 }
 
-function sendMessage (msg, channelID) {
-    client.guilds.forEach(function(guild){
-        guild.channels.forEach(function(channel){
-           if(channel.id == channelID){
-               channel.sendMessage(msg);
-               console.log("Sent message: " + msg);
-           }
+function sendMessage(msg, channelID) {
+    client.guilds.forEach(function (guild) {
+        guild.channels.forEach(function (channel) {
+            if (channel.id == channelID) {
+                channel.sendMessage(msg);
+                console.log('Sent message: ' + msg);
+            }
         });
     });
 }
