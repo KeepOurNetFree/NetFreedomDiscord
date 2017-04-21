@@ -77,6 +77,7 @@ function checkForNewPost() {
                 var checkPostTimeUTC = postData['data']['children'][0]['data'].created_utc;
                 var checkPostTitle = postData['data']['children'][0]['data'].title;
                 var checkPostURL = 'https://www.reddit.com' + postData['data']['children'][0]['data'].permalink;
+                var postAuthor = postData['data']['children'][0]['data'].author;
 
                 //if the previous post time is older than the one retrieved from the API, something new's been posted
                 if (newestPostTimeUTC < checkPostTimeUTC) {
@@ -84,7 +85,7 @@ function checkForNewPost() {
                     newestPostTimeUTC = checkPostTimeUTC;
                     //send the discord message and log it
                     sendMessage('New KONF reddit post! "' + checkPostTitle + '" ' + checkPostURL, newRedditPostChannel);
-                    console.log('New reddit post! ' + checkPostURL);
+                    console.log('New post by *' + postAuthor + '* ' + checkPostURL);
                 }
             }
             catch (err) {
