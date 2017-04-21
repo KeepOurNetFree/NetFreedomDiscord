@@ -84,8 +84,8 @@ function checkForNewPost() {
                     //set the old post time to the API post time
                     newestPostTimeUTC = checkPostTimeUTC;
                     //send the discord message and log it
-                    sendMessage('New KONF reddit post! "' + checkPostTitle + '" ' + checkPostURL, newRedditPostChannel);
-                    console.log('New post by *' + postAuthor + '* ' + checkPostURL);
+                    sendMessage('New KONF reddit post "' + checkPostTitle + '" by *' + postAuthor + '* ' + checkPostURL, newRedditPostChannel);
+                    console.log('New post by ' + postAuthor + ' ' + checkPostURL);
                 }
             }
             catch (err) {
