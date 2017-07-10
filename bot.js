@@ -29,6 +29,10 @@ client.on('message', msg => {
     if (msg.content === 'KONF subscribers') {
         checkSubCount();
     }
+    if(msg.author.id == 163267288592547840 || msg.author.id == 158015835410137089 && msg.content.includes("KONF broadcast")){
+        broadcastmsg = msg.content.replace("KONF broadcast", "");
+        broadcastMessage(broadcastmsg);
+    }
 });
 
 //the ID for channel #info
@@ -132,6 +136,16 @@ function sendMessage(msg, channelID) {
                 channel.sendMessage(msg);
                 console.log('Sent message: ' + msg);
             }
+        });
+    });
+}
+
+//sends a direct message to all members in the guild
+function broadcastMessage(msg) {
+    client.guilds.forEach(function (guild) {
+        guild.members.forEach(function (member) {
+            console.log("Sending message to " + member.user.username);
+            member.user.send(msg);
         });
     });
 }
