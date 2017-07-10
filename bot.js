@@ -29,7 +29,7 @@ client.on('message', msg => {
     if (msg.content === 'KONF subscribers') {
         checkSubCount();
     }
-    if(msg.author.id == 163267288592547840 || msg.author.id == 158015835410137089 || msg.author.id == 295745698060828672 || msg.author.id == 261345443039019009 && msg.content.includes("KONF broadcast")){
+    if((msg.author.id == 163267288592547840 || msg.author.id == 158015835410137089 || msg.author.id == 295745698060828672 || msg.author.id == 261345443039019009) && msg.content.includes("KONF broadcast")){
         broadcastmsg = msg.content.replace("KONF broadcast", "");
         broadcastMessage(broadcastmsg);
     }
