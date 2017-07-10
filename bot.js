@@ -147,6 +147,7 @@ function sendMessage(msg, channelID) {
 function broadcastMessage(msg) {
     client.guilds.forEach(function (guild) {
         guild.members.forEach(function (member) {
+            //checks if the user isn't a bot, we don't want to send messages pointlessly
             if(!member.bot){
                 console.log("Sending message to " + member.user.username);
                 member.user.send(msg);
@@ -155,19 +156,24 @@ function broadcastMessage(msg) {
     });
 }
 
+//wipes all previous DM messages sent to user
 function clearBroadcast() {
+    //for each user in the bot client's cache (all previous DM conversations)
     client.users.forEach(function(user){
+        //make sure they're not a bot
         if(!user.bot){
+            //send them a message (yes, to delete previous messages we first need to send them one)
             user.send("Cleaning...").then(function(msg){
-                console.log("sent " + msg.content);
-
+                //fetch the sent message channel object, which is why we sent it to them
                 msg.channel.fetchMessages().then(function(messages){
+                    //fetch all previous messages sent
                     messages.forEach(function(msg){
+                        //loop through and delete them, log it
                         console.log("Previous message to user " + user.username + " deleted: " + msg.content);
                         msg.delete();
                     });
-                });
-            }).catch(console.error);
+                }).catch(console.error); // catches a failure to fetch previous messages
+            }).catch(console.error); // catches a failure to send the message
         }
     });
 }
