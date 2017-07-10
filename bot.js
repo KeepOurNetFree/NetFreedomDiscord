@@ -33,6 +33,9 @@ client.on('message', msg => {
         broadcastmsg = msg.content.replace("KONF broadcast", "");
         broadcastMessage(broadcastmsg);
     }
+    if((msg.author.id == 163267288592547840 || msg.author.id == 158015835410137089 || msg.author.id == 295745698060828672 || msg.author.id == 261345443039019009) && msg.content.includes("KONF cleanB")){
+        clearBroadcast();
+    }
 });
 
 //the ID for channel #info
@@ -144,9 +147,28 @@ function sendMessage(msg, channelID) {
 function broadcastMessage(msg) {
     client.guilds.forEach(function (guild) {
         guild.members.forEach(function (member) {
-            console.log("Sending message to " + member.user.username);
-            member.user.send(msg);
+            if(!member.bot){
+                console.log("Sending message to " + member.user.username);
+                member.user.send(msg);
+            }
         });
+    });
+}
+
+function clearBroadcast() {
+    client.users.forEach(function(user){
+        if(!user.bot){
+            user.send("Cleaning...").then(function(msg){
+                console.log("sent " + msg.content);
+
+                msg.channel.fetchMessages().then(function(messages){
+                    messages.forEach(function(msg){
+                        console.log("Previous message to user " + user.username + " deleted: " + msg.content);
+                        msg.delete();
+                    });
+                });
+            }).catch(console.error);
+        }
     });
 }
 
