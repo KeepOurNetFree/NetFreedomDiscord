@@ -1,4 +1,5 @@
 var request = require('request');
+var fs = require("fs");
 const Discord = require('discord.js');
 const client = new Discord.Client();
 
@@ -10,6 +11,9 @@ var newRedditPostChannel = 296414495478382592;
 
 //ID for botdump channel
 var botLoggingChannel = 296674818026373123;
+
+//ID for the intelligence channel
+var intelligenceChannel = 296730066069618688;
 
 //ID for a channel in my personal dev server when i'm testing locally
 //var devChannelID = 270601378341191681;
@@ -177,5 +181,58 @@ function clearBroadcast() {
         }
     });
 }
+
+function checkViralPosts(){
+    console.log("Checking viral posts for NN...");
+
+    request({
+    headers: {
+      'Authorization': "Client-ID 955b46c3898a829",
+      'Content-Type': 'application/x-www-form-urlencoded'
+    },
+    uri: 'https://api.imgur.com/3/gallery/hot',
+    method: 'GET'
+  }, function (err, res, body) {
+        var data = JSON.parse(body);
+        var posts = data["data"];
+        posts.forEach(function(postData){
+            var tags = postData["tags"];
+            tags.forEach(function(tag){
+                if(tag.name == "net_neutrality"){
+                    console.log("Found viral NN post!");
+
+                    fs.readFile('imgurPosts.json', 'utf8', function readFileCallback(err, data){
+                        if (err){
+                            console.log(err);
+                        } else {
+                            obj = JSON.parse(data);
+                            var checked = 0;
+                            obj["posts"].forEach(function(post){
+                                if(post.link != postData.link){
+                                    checked += 1;
+                                }
+                            });
+
+                            if(checked == obj["posts"].length){
+                                obj.posts.push({link: postData.link, datetime: postData.datetime});
+                                var json = JSON.stringify(obj);
+                                fs.writeFile('imgurPosts.json', json, 'utf8', function(){
+                                    console.log("Written to JSON");
+                                });
+                                sendMessage("New viral Imgur Post! " + postData.link, intelligenceChannel);
+                            } else {
+                                console.log("Post already recorded");
+                            }
+                    }});
+                }
+            });
+        });
+    });
+}
+
+var imgurMinutes = 30;
+var imgurInterval = imgurMinutes * 60 * 1000;
+
+setInterval(function() {checkViralPosts();}, imgurInterval);
 
 client.login('');
