@@ -2,6 +2,7 @@ var request = require('request');
 var fs = require("fs");
 const Discord = require('discord.js');
 const client = new Discord.Client();
+var Twitter = require('twitter');
 
 //ID for landing pad
 var newMemberChannel = 295745377083326464;
@@ -33,13 +34,13 @@ client.on('message', msg => {
     if (msg.content === 'KONF subscribers') {
         checkSubCount();
     }
-    if((msg.author.id == 163267288592547840 || msg.author.id == 158015835410137089 || msg.author.id == 295745698060828672 || msg.author.id == 261345443039019009) && msg.content.includes("KONF broadcast")){
-        broadcastmsg = msg.content.replace("KONF broadcast", "");
-        broadcastMessage(broadcastmsg);
-    }
-    if((msg.author.id == 163267288592547840 || msg.author.id == 158015835410137089 || msg.author.id == 295745698060828672 || msg.author.id == 261345443039019009) && msg.content.includes("KONF cleanB")){
-        clearBroadcast();
-    }
+    // if((msg.author.id == 163267288592547840 || msg.author.id == 158015835410137089 || msg.author.id == 295745698060828672 || msg.author.id == 261345443039019009) && msg.content.includes("KONF broadcast")){
+    //     broadcastmsg = msg.content.replace("KONF broadcast", "");
+    //     broadcastMessage(broadcastmsg);
+    // }
+    // if((msg.author.id == 163267288592547840 || msg.author.id == 158015835410137089 || msg.author.id == 295745698060828672 || msg.author.id == 261345443039019009) && msg.content.includes("KONF cleanB")){
+    //     clearBroadcast();
+    // }
 });
 
 //the ID for channel #info
@@ -148,39 +149,39 @@ function sendMessage(msg, channelID) {
 }
 
 //sends a direct message to all members in the guild
-function broadcastMessage(msg) {
-    client.guilds.forEach(function (guild) {
-        guild.members.forEach(function (member) {
-            //checks if the user isn't a bot, we don't want to send messages pointlessly
-            if(!member.bot){
-                console.log("Sending message to " + member.user.username);
-                member.user.send(msg);
-            }
-        });
-    });
-}
+// function broadcastMessage(msg) {
+//     client.guilds.forEach(function (guild) {
+//         guild.members.forEach(function (member) {
+//             //checks if the user isn't a bot, we don't want to send messages pointlessly
+//             if(!member.bot){
+//                 console.log("Sending message to " + member.user.username);
+//                 member.user.send(msg);
+//             }
+//         });
+//     });
+// }
 
 //wipes all previous DM messages sent to user
-function clearBroadcast() {
-    //for each user in the bot client's cache (all previous DM conversations)
-    client.users.forEach(function(user){
-        //make sure they're not a bot
-        if(!user.bot){
-            //send them a message (yes, to delete previous messages we first need to send them one)
-            user.send("Cleaning...").then(function(msg){
-                //fetch the sent message channel object, which is why we sent it to them
-                msg.channel.fetchMessages().then(function(messages){
-                    //fetch all previous messages sent
-                    messages.forEach(function(msg){
-                        //loop through and delete them, log it
-                        console.log("Previous message to user " + user.username + " deleted: " + msg.content);
-                        msg.delete();
-                    });
-                }).catch(console.error); // catches a failure to fetch previous messages
-            }).catch(console.error); // catches a failure to send the message
-        }
-    });
-}
+// function clearBroadcast() {
+//     //for each user in the bot client's cache (all previous DM conversations)
+//     client.users.forEach(function(user){
+//         //make sure they're not a bot
+//         if(!user.bot){
+//             //send them a message (yes, to delete previous messages we first need to send them one)
+//             user.send("Cleaning...").then(function(msg){
+//                 //fetch the sent message channel object, which is why we sent it to them
+//                 msg.channel.fetchMessages().then(function(messages){
+//                     //fetch all previous messages sent
+//                     messages.forEach(function(msg){
+//                         //loop through and delete them, log it
+//                         console.log("Previous message to user " + user.username + " deleted: " + msg.content);
+//                         msg.delete();
+//                     });
+//                 }).catch(console.error); // catches a failure to fetch previous messages
+//             }).catch(console.error); // catches a failure to send the message
+//         }
+//     });
+// }
 
 function checkViralPosts(){
     console.log("Checking viral posts for NN...");
@@ -235,4 +236,39 @@ var imgurInterval = imgurMinutes * 60 * 1000;
 
 setInterval(function() {checkViralPosts();}, imgurInterval);
 
-client.login('');
+client.login('Mjk1OTQzNjcxMjk0MDY2Njk5.DE1nIw.2ADIXcbWzwy2pZZ45cuTeTPOdq8');
+
+//TWITTER STUFF FROM HERE ONWARDS
+
+var twitter = new Twitter({
+  consumer_key: process.env.TWITTER_CONSUMER_KEY,
+  consumer_secret: process.env.TWITTER_CONSUMER_SECRET,
+  access_token_key: process.env.TWITTER_ACCESS_TOKEN_KEY,
+  access_token_secret: process.env.TWITTER_ACCESS_TOKEN_SECRET
+});
+ 
+var previousPostID = 0;
+var queryURL = encodeURI("https://api.twitter.com/1.1/statuses/user_timeline.json?screen_name=comcast&exclude_replies=true");
+
+function getLatestCCTweet(){
+    twitter.get(queryURL, function(error, tweets, response) {
+        if (!error) {
+            if(tweets[0]["id"] != previousPostID){
+                console.log("New tweet found!");
+                sendMessage("Latest tweet by @Comcast. *" + decodeURIComponent(tweets[0]["text"]) + "* " + tweets[0]["entities"]["media"][0]["url"], intelligenceChannel);
+                previousPostID = tweets[0]["id"];
+            }
+        } else {
+            console.log(error);
+        }
+    });
+}
+
+var TweetMinutes = 60;
+var TweetInterval = TweetMinutes * 60 * 1000;
+
+setInterval(getLatestCCTweet, TweetInterval);
+
+if(previousPostID == 0){
+    getLatestCCTweet();
+}
