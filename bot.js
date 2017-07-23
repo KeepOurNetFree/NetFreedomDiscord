@@ -166,7 +166,6 @@ function sendMessage(msg, channelID) {
     console.log("Sending message...");
     //loop through all channels the bot has read permissions in
     client.channels.forEach(function (channel) {
-        console.log(channel);
         if (channel.id == channelID) {
             if(channel.type == "text"){
                 channel.send(msg).then(message => console.log(`Sent message: ${message.content}`)).catch(console.error);
