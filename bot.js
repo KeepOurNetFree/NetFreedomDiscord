@@ -23,6 +23,7 @@ var intelligenceChannel = 296730066069618688;
 client.on('ready', () => {
     console.log('Connected!');
     findInfoChannel();
+    getLatestCCTweet();
 });
 
 //message recieved event
@@ -49,13 +50,11 @@ var infoChannelID = 296678122135355393;
 var infoChannel;
 
 function findInfoChannel() {
-    client.guilds.forEach(function (guild) {
-        guild.channels.forEach(function (channel) {
-            if (channel.id == infoChannelID) {
-                //sets the info channel so we can use it in the mentions later
-                infoChannel = channel;
-            }
-        });
+    client.channels.forEach(function (channel) {
+        if (channel.id == infoChannelID) {
+            //sets the info channel so we can use it in the mentions later
+            infoChannel = channel;
+        }
     });
 }
 
@@ -107,6 +106,35 @@ function checkForNewPost() {
     });
 }
 
+var twitterClient = new Twitter({
+  consumer_key: process.env.TWITTER_CONSUMER_KEY,
+  consumer_secret: process.env.TWITTER_CONSUMER_SECRET,
+  access_token_key: process.env.TWITTER_ACCESS_TOKEN_KEY,
+  access_token_secret: process.env.TWITTER_ACCESS_TOKEN_SECRET
+});
+ 
+var previousPostID = 0;
+var queryURL = encodeURI("https://api.twitter.com/1.1/statuses/user_timeline.json?screen_name=comcast&exclude_replies=true");
+
+function getLatestCCTweet(){
+    twitterClient.get(queryURL, function(error, tweets, response) {
+        if (!error) {
+            if(tweets[0]["id"] != previousPostID){
+                console.log("New tweet found!");
+                sendMessage("Latest tweet by @Comcast. *" + decodeURIComponent(tweets[0]["text"]) + "* at " + tweets[0]["created_at"], intelligenceChannel);
+                previousPostID = tweets[0]["id"];
+            }
+        } else {
+            console.log(error);
+        }
+    });
+}
+
+var TweetMinutes = 60;
+var TweetInterval = TweetMinutes * 60 * 1000;
+
+setInterval(getLatestCCTweet, TweetInterval);
+
 //minutes between checking for a new reddit post
 var minutes = 0.5;
 var interval = minutes * 60 * 1000;
@@ -135,16 +163,15 @@ function checkSubCount() {
 
 //the send message function
 function sendMessage(msg, channelID) {
-    //loop through all guilds the bot's in, currently only 1, the KONF server
-    client.guilds.forEach(function (guild) {
-        //in each guild loop through every channel, if it matches the channel we want the message to send to, send it
-        guild.channels.forEach(function (channel) {
-            if (channel.id == channelID) {
-                //send the message and log it
-                channel.sendMessage(msg);
-                console.log('Sent message: ' + msg);
+    console.log("Sending message...");
+    //loop through all channels the bot has read permissions in
+    client.channels.forEach(function (channel) {
+        console.log(channel);
+        if (channel.id == channelID) {
+            if(channel.type == "text"){
+                channel.send(msg).then(message => console.log(`Sent message: ${message.content}`)).catch(console.error);
             }
-        });
+        }
     });
 }
 
@@ -236,39 +263,4 @@ var imgurInterval = imgurMinutes * 60 * 1000;
 
 setInterval(function() {checkViralPosts();}, imgurInterval);
 
-client.login('Mjk1OTQzNjcxMjk0MDY2Njk5.DE1nIw.2ADIXcbWzwy2pZZ45cuTeTPOdq8');
-
-//TWITTER STUFF FROM HERE ONWARDS
-
-var twitter = new Twitter({
-  consumer_key: process.env.TWITTER_CONSUMER_KEY,
-  consumer_secret: process.env.TWITTER_CONSUMER_SECRET,
-  access_token_key: process.env.TWITTER_ACCESS_TOKEN_KEY,
-  access_token_secret: process.env.TWITTER_ACCESS_TOKEN_SECRET
-});
- 
-var previousPostID = 0;
-var queryURL = encodeURI("https://api.twitter.com/1.1/statuses/user_timeline.json?screen_name=comcast&exclude_replies=true");
-
-function getLatestCCTweet(){
-    twitter.get(queryURL, function(error, tweets, response) {
-        if (!error) {
-            if(tweets[0]["id"] != previousPostID){
-                console.log("New tweet found!");
-                sendMessage("Latest tweet by @Comcast. *" + decodeURIComponent(tweets[0]["text"]) + "* " + tweets[0]["entities"]["media"][0]["url"], intelligenceChannel);
-                previousPostID = tweets[0]["id"];
-            }
-        } else {
-            console.log(error);
-        }
-    });
-}
-
-var TweetMinutes = 60;
-var TweetInterval = TweetMinutes * 60 * 1000;
-
-setInterval(getLatestCCTweet, TweetInterval);
-
-if(previousPostID == 0){
-    getLatestCCTweet();
-}
+client.login('');
