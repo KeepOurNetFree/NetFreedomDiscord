@@ -62,7 +62,7 @@ function findInfoChannel() {
 client.on('guildMemberAdd', member => {
     //welcome the new user
     sendMessage("Welcome " + member.user + "! Thanks for helping to Keep Our Net Free! Be sure to give " + infoChannel + " a read!", newMemberChannel);
-    sendMessage("User " + member.user + " has joined.", botLoggingChannel);
+    sendMessage("User " + member.user + " has joined. ID: " + member.id + " - Avatar URL: " + member.user.avatarURL + " - is a bot? " + member.user.bot + " - Created At:" + member.user.createdAt, botLoggingChannel);
 });
 
 //event for people leaving or being kicked, sent to the log only
