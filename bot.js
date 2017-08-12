@@ -23,7 +23,6 @@ var intelligenceChannel = 296730066069618688;
 client.on('ready', () => {
     console.log('Connected!');
     findInfoChannel();
-    getLatestCCTweet();
 });
 
 //message recieved event
@@ -119,10 +118,12 @@ var queryURL = encodeURI("https://api.twitter.com/1.1/statuses/user_timeline.jso
 function getLatestCCTweet(){
     twitterClient.get(queryURL, function(error, tweets, response) {
         if (!error) {
-            if(tweets[0]["id"] != previousPostID){
-                console.log("New tweet found!");
-                sendMessage("Latest tweet by @Comcast. *" + decodeURIComponent(tweets[0]["text"]) + "* at " + tweets[0]["created_at"], intelligenceChannel);
-                previousPostID = tweets[0]["id"];
+            if(tweets[0] != undefined){
+                if(tweets[0]["id"] != previousPostID){
+                    console.log("New tweet found!");
+                    sendMessage("Latest tweet by @Comcast. *" + decodeURIComponent(tweets[0]["text"]) + "* at " + tweets[0]["created_at"] + " **Link: **" + "https://twitter.com/statuses/" + tweets[0]["id_str"], intelligenceChannel);
+                    previousPostID = tweets[0]["id"];
+                }
             }
         } else {
             console.log(error);
