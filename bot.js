@@ -212,6 +212,16 @@ function sendMessage(msg, channelID) {
 function checkViralPosts(){
     console.log("Checking viral posts for NN...");
 
+    var valid_tags = ["net_neutrality",
+                  "title_ii",
+                  "title_2",
+                  "ajit_pai",
+                  "ajit-pai",
+                  "fcc",
+                  "verizon",
+                  "comcast",
+                ]
+
     request({
     headers: {
       'Authorization': "Client-ID 955b46c3898a829",
@@ -225,32 +235,35 @@ function checkViralPosts(){
         posts.forEach(function(postData){
             var tags = postData["tags"];
             tags.forEach(function(tag){
-                if(tag.name == "net_neutrality"){
-                    console.log("Found viral NN post!");
+                for (var tag in valid_tags) {
+                    if(tag.name == tag){
+                        console.log("Found viral " + tag + " post!");
 
-                    fs.readFile('imgurPosts.json', 'utf8', function readFileCallback(err, data){
-                        if (err){
-                            console.log(err);
-                        } else {
-                            obj = JSON.parse(data);
-                            var checked = 0;
-                            obj["posts"].forEach(function(post){
-                                if(post.link != postData.link){
-                                    checked += 1;
-                                }
-                            });
-
-                            if(checked == obj["posts"].length){
-                                obj.posts.push({link: postData.link, datetime: postData.datetime});
-                                var json = JSON.stringify(obj);
-                                fs.writeFile('imgurPosts.json', json, 'utf8', function(){
-                                    console.log("Written to JSON");
-                                });
-                                sendMessage("New viral Imgur Post! " + postData.link, intelligenceChannel);
+                        fs.readFile('imgurPosts.json', 'utf8', function readFileCallback(err, data){
+                            if (err){
+                                console.log(err);
                             } else {
-                                console.log("Post already recorded");
-                            }
-                    }});
+                                obj = JSON.parse(data);
+                                var checked = 0;
+                                obj["posts"].forEach(function(post){
+                                    if(post.link != postData.link){
+                                        checked += 1;
+                                    }
+                                });
+
+                                if(checked == obj["posts"].length){
+                                    obj.posts.push({link: postData.link, datetime: postData.datetime});
+                                    var json = JSON.stringify(obj);
+                                    fs.writeFile('imgurPosts.json', json, 'utf8', function(){
+                                        console.log("Written to JSON");
+                                    });
+                                    sendMessage("New viral Imgur Post! " + postData.link, intelligenceChannel);
+                                } else {
+                                    console.log("Post already recorded");
+                                }
+                        }});
+                        break;
+                    }
                 }
             });
         });
