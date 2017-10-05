@@ -25,6 +25,12 @@ client.on('ready', () => {
     findInfoChannel();
 });
 
+var restartMinutes = 180;
+var restartInterval = restartMinutes * 60 * 1000;
+setInterval(function(){
+    client.destroy().then(() => client.login('Mjk1OTQzNjcxMjk0MDY2Njk5.DFaOfg.7KTLYQUt655U3viei69Xz0Xt4EY'));
+}, restartInterval);
+
 //message recieved event
 client.on('message', msg => {
     //respond to the various commands
@@ -66,7 +72,7 @@ client.on('guildMemberAdd', member => {
 
 //event for people leaving or being kicked, sent to the log only
 client.on('guildMemberRemove', member => {
-    sendMessage("User " + member.user + " has left.", botLoggingChannel);
+    sendMessage("User " + member.user + " has left. Username: " + member.user.username + " - Nickname(if any): " + member.nickname, botLoggingChannel);
 });
 
 //Current UTC time. Reddit uses seconds, not milliseconds like JS
@@ -164,7 +170,6 @@ function checkSubCount() {
 
 //the send message function
 function sendMessage(msg, channelID) {
-    console.log("Sending message...");
     //loop through all channels the bot has read permissions in
     client.channels.forEach(function (channel) {
         if (channel.id == channelID) {
@@ -175,44 +180,7 @@ function sendMessage(msg, channelID) {
     });
 }
 
-//sends a direct message to all members in the guild
-// function broadcastMessage(msg) {
-//     client.guilds.forEach(function (guild) {
-//         guild.members.forEach(function (member) {
-//             //checks if the user isn't a bot, we don't want to send messages pointlessly
-//             if(!member.bot){
-//                 console.log("Sending message to " + member.user.username);
-//                 member.user.send(msg);
-//             }
-//         });
-//     });
-// }
-
-//wipes all previous DM messages sent to user
-// function clearBroadcast() {
-//     //for each user in the bot client's cache (all previous DM conversations)
-//     client.users.forEach(function(user){
-//         //make sure they're not a bot
-//         if(!user.bot){
-//             //send them a message (yes, to delete previous messages we first need to send them one)
-//             user.send("Cleaning...").then(function(msg){
-//                 //fetch the sent message channel object, which is why we sent it to them
-//                 msg.channel.fetchMessages().then(function(messages){
-//                     //fetch all previous messages sent
-//                     messages.forEach(function(msg){
-//                         //loop through and delete them, log it
-//                         console.log("Previous message to user " + user.username + " deleted: " + msg.content);
-//                         msg.delete();
-//                     });
-//                 }).catch(console.error); // catches a failure to fetch previous messages
-//             }).catch(console.error); // catches a failure to send the message
-//         }
-//     });
-// }
-
 function checkViralPosts(){
-    console.log("Checking viral posts for NN...");
-
     var valid_tags = ["net_neutrality",
                   "title_ii",
                   "title_2",
@@ -231,43 +199,50 @@ function checkViralPosts(){
     uri: 'https://api.imgur.com/3/gallery/hot',
     method: 'GET'
   }, function (err, res, body) {
-        var data = JSON.parse(body);
+        var data;    
+        try {
+            data = JSON.parse(body);
+        } catch (e) {
+            return false;
+        }
         var posts = data["data"];
-        posts.forEach(function(postData){
-            var tags = postData["tags"];
-            tags.forEach(function(tag){
-                for (var tag in valid_tags) {
-                    if(tag.name == tag){
-                        console.log("Found viral " + tag + " post!");
-
-                        fs.readFile('imgurPosts.json', 'utf8', function readFileCallback(err, data){
-                            if (err){
-                                console.log(err);
-                            } else {
-                                obj = JSON.parse(data);
-                                var checked = 0;
-                                obj["posts"].forEach(function(post){
-                                    if(post.link != postData.link){
-                                        checked += 1;
-                                    }
-                                });
-
-                                if(checked == obj["posts"].length){
-                                    obj.posts.push({link: postData.link, datetime: postData.datetime});
-                                    var json = JSON.stringify(obj);
-                                    fs.writeFile('imgurPosts.json', json, 'utf8', function(){
-                                        console.log("Written to JSON");
-                                    });
-                                    sendMessage("New viral Imgur Post! " + postData.link, intelligenceChannel);
+        if(posts.length >= 1){
+            posts.forEach(function(postData){
+                var tags = postData["tags"];
+                tags.forEach(function(tag){
+                    for (var vtag in valid_tags) {
+                        if(tag.name == vtag){
+                            console.log("Found viral " + tag + " post!");
+    
+                            fs.readFile('imgurPosts.json', 'utf8', function readFileCallback(err, data){
+                                if (err){
+                                    console.log(err);
                                 } else {
-                                    console.log("Post already recorded");
-                                }
-                        }});
-                        break;
+                                    obj = JSON.parse(data);
+                                    var checked = 0;
+                                    obj["posts"].forEach(function(post){
+                                        if(post.link != postData.link){
+                                            checked += 1;
+                                        }
+                                    });
+    
+                                    if(checked == obj["posts"].length){
+                                        obj.posts.push({link: postData.link, datetime: postData.datetime});
+                                        var json = JSON.stringify(obj);
+                                        fs.writeFile('imgurPosts.json', json, 'utf8', function(){
+                                            console.log("Written to JSON");
+                                        });
+                                        sendMessage("New viral Imgur Post! " + postData.link, intelligenceChannel);
+                                    } else {
+                                        console.log("Post already recorded");
+                                    }
+                            }});
+                            break;
+                        }
                     }
-                }
+                });
             });
-        });
+        }
     });
 }
 
