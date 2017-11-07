@@ -105,11 +105,54 @@ function checkForNewPost() {
                 }
             }
             catch (err) {
-                console.log('Error while getting latest Reddit post: ' + err.message)
+                console.log('Error while getting latest Reddit post: ' + err.message);
             }
         }
     });
 }
+
+//minutes between checking for a new reddit post
+var minutes = 0.5;
+var interval = minutes * 60 * 1000;
+
+setInterval(checkForNewPost, interval);
+
+function checkAllPosts(){
+    request('https://www.reddit.com/r/all/top/.json?sort=top&t=day&count=0&limit=100', function (error, response, body) {
+        if (error) {
+            console.log(error);
+        }
+        else {
+            try {
+                var postData = JSON.parse(body);
+                var currentPost = 0;
+
+                //for each post on /r/all
+                postData["data"]["children"].forEach(function(post){
+                    currentPost += 1;
+                    //if the post is from /r/KONF
+                    if(post["data"]["subreddit_name_prefixed"] === "r/KeepOurNetFree"){
+                        if(currentPost >= 25){
+                            sendMessage("**Currently trending on /r/all ** " + 'https://www.reddit.com' + post["data"].permalink + "**Ranked: " + currentPost + "**", newRedditPostChannel);
+                            sendMessage("**Post hit the front page:** " + 'https://www.reddit.com' + post["data"].permalink + "**Ranked: " + currentPost + "**", intelligenceChannel);
+                        } else {
+                            sendMessage("**Currently trending on /r/all ** " + 'https://www.reddit.com' + post["data"].permalink + "**Ranked: " + currentPost + "**", newRedditPostChannel);
+                        }
+                    }
+                });
+            }
+            catch (err) {
+                console.log('Error while getting /r/all: ' + err.message);
+            }
+        }
+    });
+}
+
+//check every 6 hours for a post on /r/all
+var allMinutes = 360;
+var allInterval = minutes * 60 * 1000;
+
+setInterval(checkAllPosts, allInterval);
 
 var twitterClient = new Twitter({
   consumer_key: process.env.TWITTER_CONSUMER_KEY,
@@ -141,12 +184,6 @@ var TweetMinutes = 60;
 var TweetInterval = TweetMinutes * 60 * 1000;
 
 setInterval(getLatestCCTweet, TweetInterval);
-
-//minutes between checking for a new reddit post
-var minutes = 0.5;
-var interval = minutes * 60 * 1000;
-
-setInterval(checkForNewPost, interval);
 
 var currentSubCount = 0;
 
