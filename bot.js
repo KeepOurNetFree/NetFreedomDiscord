@@ -7,7 +7,7 @@ var Twitter = require('twitter');
 //ID for landing pad
 var newMemberChannel = 295745377083326464;
 
-//ID for subreddit-pr channel
+//ID for subreddit-feed channel
 var newRedditPostChannel = 296414495478382592;
 
 //ID for botdump channel
@@ -16,37 +16,18 @@ var botLoggingChannel = 296674818026373123;
 //ID for the intelligence channel
 var intelligenceChannel = 296730066069618688;
 
-//ID for a channel in my personal dev server when i'm testing locally
-//var devChannelID = 270601378341191681;
-
 //pretty self-explanatory, when the bot's connected properly, log it, for some reason this happens a couple times when the bot first starts
 client.on('ready', () => {
     console.log('Connected!');
     findInfoChannel();
 });
 
-var restartMinutes = 180;
-var restartInterval = restartMinutes * 60 * 1000;
-setInterval(function(){
-    client.destroy().then(() => client.login('Mjk1OTQzNjcxMjk0MDY2Njk5.DFaOfg.7KTLYQUt655U3viei69Xz0Xt4EY'));
-}, restartInterval);
-
 //message recieved event
 client.on('message', msg => {
     //respond to the various commands
-    if (msg.content === 'KONF help') {
-        msg.reply('New members are welcomed automatically. Run "KONF subscribers" to see the current sub count.');
-    }
-    if (msg.content === 'KONF subscribers') {
+    if (msg.content === '!KONF subscribers') {
         checkSubCount();
     }
-    // if((msg.author.id == 163267288592547840 || msg.author.id == 158015835410137089 || msg.author.id == 295745698060828672 || msg.author.id == 261345443039019009) && msg.content.includes("KONF broadcast")){
-    //     broadcastmsg = msg.content.replace("KONF broadcast", "");
-    //     broadcastMessage(broadcastmsg);
-    // }
-    // if((msg.author.id == 163267288592547840 || msg.author.id == 158015835410137089 || msg.author.id == 295745698060828672 || msg.author.id == 261345443039019009) && msg.content.includes("KONF cleanB")){
-    //     clearBroadcast();
-    // }
 });
 
 //the ID for channel #info
@@ -217,75 +198,10 @@ function sendMessage(msg, channelID) {
     });
 }
 
-function checkViralPosts(){
-    var valid_tags = ["net_neutrality",
-                  "title_ii",
-                  "title_2",
-                  "ajit_pai",
-                  "ajit-pai",
-                  "fcc",
-                  "verizon",
-                  "comcast",
-                ]
+client.login(process.env.DISCORD_TOKEN);
 
-    request({
-    headers: {
-      'Authorization': "Client-ID 955b46c3898a829",
-      'Content-Type': 'application/x-www-form-urlencoded'
-    },
-    uri: 'https://api.imgur.com/3/gallery/hot',
-    method: 'GET'
-  }, function (err, res, body) {
-        var data;    
-        try {
-            data = JSON.parse(body);
-        } catch (e) {
-            return false;
-        }
-        var posts = data["data"];
-        if(posts.length >= 1){
-            posts.forEach(function(postData){
-                var tags = postData["tags"];
-                tags.forEach(function(tag){
-                    for (var vtag in valid_tags) {
-                        if(tag.name == vtag){
-                            console.log("Found viral " + tag + " post!");
-    
-                            fs.readFile('imgurPosts.json', 'utf8', function readFileCallback(err, data){
-                                if (err){
-                                    console.log(err);
-                                } else {
-                                    obj = JSON.parse(data);
-                                    var checked = 0;
-                                    obj["posts"].forEach(function(post){
-                                        if(post.link != postData.link){
-                                            checked += 1;
-                                        }
-                                    });
-    
-                                    if(checked == obj["posts"].length){
-                                        obj.posts.push({link: postData.link, datetime: postData.datetime});
-                                        var json = JSON.stringify(obj);
-                                        fs.writeFile('imgurPosts.json', json, 'utf8', function(){
-                                            console.log("Written to JSON");
-                                        });
-                                        sendMessage("New viral Imgur Post! " + postData.link, intelligenceChannel);
-                                    } else {
-                                        console.log("Post already recorded");
-                                    }
-                            }});
-                            break;
-                        }
-                    }
-                });
-            });
-        }
-    });
-}
-
-var imgurMinutes = 30;
-var imgurInterval = imgurMinutes * 60 * 1000;
-
-setInterval(function() {checkViralPosts();}, imgurInterval);
-
-client.login('');
+var restartMinutes = 180;
+var restartInterval = restartMinutes * 60 * 1000;
+setInterval(function(){
+    client.destroy().then(() => client.login(process.env.DISCORD_TOKEN));
+}, restartInterval);

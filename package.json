@@ -17,8 +17,8 @@
   },
   "homepage": "https://github.com/KeepOurNetFree/NetFreedomDiscord#readme",
   "dependencies": {
-    "discord.js": "^11.0.0",
-    "request": "^2.81.0",
+    "discord.js": "^11.2.1",
+    "request": "^2.83.0",
     "twitter": "^1.7.1"
   }
 }
