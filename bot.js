@@ -65,6 +65,7 @@ function checkForNewPost() {
         if (error) {
             //if it errors, log it
             console.log(error);
+            console.log("Above error ^^ from request to Reddit for new KONF posts!");
         }
         else {
             //A try/catch for if the postdata is invalid JSON, if there's no first child, no permalink, etc.
@@ -102,6 +103,7 @@ function checkAllPosts(){
     request('https://www.reddit.com/r/all/top/.json?sort=top&t=day&count=0&limit=100', function (error, response, body) {
         if (error) {
             console.log(error);
+            console.log("Above error ^^ from request to Reddit for /r/all posts!");
         }
         else {
             try {
@@ -157,6 +159,7 @@ function getLatestCCTweet(){
             }
         } else {
             console.log(error);
+            console.log("Above error ^^ from Twitter API for comcast tweets!");
         }
     });
 }
@@ -173,6 +176,7 @@ function checkSubCount() {
     request('https://www.reddit.com/r/KeepOurNetFree/about.json', function (error, response, body) {
         if (error) {
             console.log(error);
+            console.log("Above error ^^ from sub count checking for KONF!");
         }
         else {
             var subData = JSON.parse(body);
