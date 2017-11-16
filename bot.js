@@ -133,7 +133,7 @@ function checkAllPosts(){
 
 //check every 6 hours for a post on /r/all
 var allMinutes = 360;
-var allInterval = minutes * 60 * 1000;
+var allInterval = allMinutes * 60 * 1000;
 
 setInterval(checkAllPosts, allInterval);
 
