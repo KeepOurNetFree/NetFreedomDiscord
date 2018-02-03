@@ -3,6 +3,7 @@ var fs = require("fs");
 const Discord = require('discord.js');
 const client = new Discord.Client();
 var Twitter = require('twitter');
+const isOnline = require('is-online');
 
 //ID for landing pad
 var newMemberChannel = 295745377083326464;
@@ -61,36 +62,40 @@ var newestPostTimeUTC = Math.floor(new Date().getTime() / 1000);
 
 function checkForNewPost() {
     //make a request to the api page for sub posts
-    request('https://www.reddit.com/r/KeepOurNetFree/new/.json', function (error, response, body) {
-        if (error) {
-            //if it errors, log it
-            console.log(error);
-            console.log("Above error ^^ from request to Reddit for new KONF posts!");
-        }
-        else {
-            //A try/catch for if the postdata is invalid JSON, if there's no first child, no permalink, etc.
-            try {
-                var postData = JSON.parse(body);
-                //get the time, title and url of the newest post, constructed from the JSON
-                var checkPostTimeUTC = postData['data']['children'][0]['data'].created_utc;
-                var checkPostTitle = postData['data']['children'][0]['data'].title;
-                var checkPostURL = 'https://www.reddit.com' + postData['data']['children'][0]['data'].permalink;
-                var postAuthor = postData['data']['children'][0]['data'].author;
-
-                //if the previous post time is older than the one retrieved from the API, something new's been posted
-                if (newestPostTimeUTC < checkPostTimeUTC) {
-                    //set the old post time to the API post time
-                    newestPostTimeUTC = checkPostTimeUTC;
-                    //send the discord message and log it
-                    sendMessage('New KONF reddit post "' + checkPostTitle + '" by *' + postAuthor + '* ' + checkPostURL, newRedditPostChannel);
-                    console.log('New post by ' + postAuthor + ' ' + checkPostURL);
+    isOnline().then(online => {
+        if(online === true){
+            request('https://www.reddit.com/r/KeepOurNetFree/new/.json', function (error, response, body) {
+                if (error) {
+                    //if it errors, log it
+                    console.log(error);
+                    console.log("Above error ^^ from request to Reddit for new KONF posts!");
                 }
-            }
-            catch (err) {
-                console.log('Error while getting latest Reddit post: ' + err.message);
-            }
+                else {
+                    //A try/catch for if the postdata is invalid JSON, if there's no first child, no permalink, etc.
+                    try {
+                        var postData = JSON.parse(body);
+                        //get the time, title and url of the newest post, constructed from the JSON
+                        var checkPostTimeUTC = postData['data']['children'][0]['data'].created_utc;
+                        var checkPostTitle = postData['data']['children'][0]['data'].title;
+                        var checkPostURL = 'https://www.reddit.com' + postData['data']['children'][0]['data'].permalink;
+                        var postAuthor = postData['data']['children'][0]['data'].author;
+        
+                        //if the previous post time is older than the one retrieved from the API, something new's been posted
+                        if (newestPostTimeUTC < checkPostTimeUTC) {
+                            //set the old post time to the API post time
+                            newestPostTimeUTC = checkPostTimeUTC;
+                            //send the discord message and log it
+                            sendMessage('New KONF reddit post "' + checkPostTitle + '" by *' + postAuthor + '* ' + checkPostURL, newRedditPostChannel);
+                            console.log('New post by ' + postAuthor + ' ' + checkPostURL);
+                        }
+                    }
+                    catch (err) {
+                        console.log('Error while getting latest Reddit post: ' + err.message);
+                    }
+                }
+            });
         }
-    });
+    });  
 }
 
 //minutes between checking for a new reddit post
@@ -100,35 +105,39 @@ var interval = minutes * 60 * 1000;
 setInterval(checkForNewPost, interval);
 
 function checkAllPosts(){
-    request('https://www.reddit.com/r/all/top/.json?sort=top&t=day&count=0&limit=100', function (error, response, body) {
-        if (error) {
-            console.log(error);
-            console.log("Above error ^^ from request to Reddit for /r/all posts!");
-        }
-        else {
-            try {
-                var postData = JSON.parse(body);
-                var currentPost = 0;
-
-                //for each post on /r/all
-                postData["data"]["children"].forEach(function(post){
-                    currentPost += 1;
-                    //if the post is from /r/KONF
-                    if(post["data"]["subreddit_name_prefixed"] === "r/KeepOurNetFree"){
-                        if(currentPost >= 25){
-                            sendMessage("**Currently trending on /r/all ** " + 'https://www.reddit.com' + post["data"].permalink + "**Ranked: " + currentPost + "**", newRedditPostChannel);
-                            sendMessage("**Post hit the front page:** " + 'https://www.reddit.com' + post["data"].permalink + "**Ranked: " + currentPost + "**", intelligenceChannel);
-                        } else {
-                            sendMessage("**Currently trending on /r/all ** " + 'https://www.reddit.com' + post["data"].permalink + "**Ranked: " + currentPost + "**", newRedditPostChannel);
-                        }
+    isOnline().then(online => {
+        if(online === true){
+            request('https://www.reddit.com/r/all/top/.json?sort=top&t=day&count=0&limit=100', function (error, response, body) {
+                if (error) {
+                    console.log(error);
+                    console.log("Above error ^^ from request to Reddit for /r/all posts!");
+                }
+                else {
+                    try {
+                        var postData = JSON.parse(body);
+                        var currentPost = 0;
+        
+                        //for each post on /r/all
+                        postData["data"]["children"].forEach(function(post){
+                            currentPost += 1;
+                            //if the post is from /r/KONF
+                            if(post["data"]["subreddit_name_prefixed"] === "r/KeepOurNetFree"){
+                                if(currentPost >= 25){
+                                    sendMessage("**Currently trending on /r/all ** " + 'https://www.reddit.com' + post["data"].permalink + "**Ranked: " + currentPost + "**", newRedditPostChannel);
+                                    sendMessage("**Post hit the front page:** " + 'https://www.reddit.com' + post["data"].permalink + "**Ranked: " + currentPost + "**", intelligenceChannel);
+                                } else {
+                                    sendMessage("**Currently trending on /r/all ** " + 'https://www.reddit.com' + post["data"].permalink + "**Ranked: " + currentPost + "**", newRedditPostChannel);
+                                }
+                            }
+                        });
                     }
-                });
-            }
-            catch (err) {
-                console.log('Error while getting /r/all: ' + err.message);
-            }
+                    catch (err) {
+                        console.log('Error while getting /r/all: ' + err.message);
+                    }
+                }
+            });
         }
-    });
+    });  
 }
 
 //check every 6 hours for a post on /r/all
@@ -148,20 +157,24 @@ var previousPostID = 0;
 var queryURL = encodeURI("https://api.twitter.com/1.1/statuses/user_timeline.json?screen_name=comcast&exclude_replies=true");
 
 function getLatestCCTweet(){
-    twitterClient.get(queryURL, function(error, tweets, response) {
-        if (!error) {
-            if(tweets[0] != undefined){
-                if(tweets[0]["id"] != previousPostID){
-                    console.log("New tweet found!");
-                    sendMessage("Latest tweet by @Comcast. *" + decodeURIComponent(tweets[0]["text"]) + "* at " + tweets[0]["created_at"] + " **Link: **" + "https://twitter.com/statuses/" + tweets[0]["id_str"], intelligenceChannel);
-                    previousPostID = tweets[0]["id"];
+    isOnline().then(online => {
+        if(online === true){
+            twitterClient.get(queryURL, function(error, tweets, response) {
+                if (!error) {
+                    if(tweets[0] != undefined){
+                        if(tweets[0]["id"] != previousPostID){
+                            console.log("New tweet found!");
+                            sendMessage("Latest tweet by @Comcast. *" + decodeURIComponent(tweets[0]["text"]) + "* at " + tweets[0]["created_at"] + " **Link: **" + "https://twitter.com/statuses/" + tweets[0]["id_str"], intelligenceChannel);
+                            previousPostID = tweets[0]["id"];
+                        }
+                    }
+                } else {
+                    console.log(error);
+                    console.log("Above error ^^ from Twitter API for comcast tweets!");
                 }
-            }
-        } else {
-            console.log(error);
-            console.log("Above error ^^ from Twitter API for comcast tweets!");
+            });
         }
-    });
+    });  
 }
 
 var TweetMinutes = 60;
@@ -173,19 +186,23 @@ var currentSubCount = 0;
 
 function checkSubCount() {
     //make an API request to the about page of the sub
-    request('https://www.reddit.com/r/KeepOurNetFree/about.json', function (error, response, body) {
-        if (error) {
-            console.log(error);
-            console.log("Above error ^^ from sub count checking for KONF!");
-        }
-        else {
-            var subData = JSON.parse(body);
-            //store the sub count
-            var subscriberCount = subData['data'].subscribers;
-
-            //print it out as a reply
-            sendMessage('Current subscriber count: ' + subscriberCount, newRedditPostChannel);
-            console.log('Current subscriber count: ' + subscriberCount);
+    isOnline().then(online => {
+        if(online === true){  
+            request('https://www.reddit.com/r/KeepOurNetFree/about.json', function (error, response, body) {
+                if (error) {
+                    console.log(error);
+                    console.log("Above error ^^ from sub count checking for KONF!");
+                }
+                else {
+                    var subData = JSON.parse(body);
+                    //store the sub count
+                    var subscriberCount = subData['data'].subscribers;
+        
+                    //print it out as a reply
+                    sendMessage('Current subscriber count: ' + subscriberCount, newRedditPostChannel);
+                    console.log('Current subscriber count: ' + subscriberCount);
+                }
+            });
         }
     });
 }
@@ -202,10 +219,19 @@ function sendMessage(msg, channelID) {
     });
 }
 
+client.on('error', err => {
+    console.log("Discord Socket Error. Attempting a restart...");
+    client.destroy().then(() => client.login(process.env.DISCORD_TOKEN));
+});
+
 client.login(process.env.DISCORD_TOKEN);
 
 var restartMinutes = 180;
 var restartInterval = restartMinutes * 60 * 1000;
 setInterval(function(){
-    client.destroy().then(() => client.login(process.env.DISCORD_TOKEN));
+    isOnline().then(online => {
+        if(online === true){
+            client.destroy().then(() => client.login(process.env.DISCORD_TOKEN));
+        }
+    });
 }, restartInterval);
